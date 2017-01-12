@@ -13,9 +13,30 @@ public class Movement : MonoBehaviour
 
     private float armRotation = 0.0f;
     private float extensionRotation = 0.0f;
+    private float welderRotation = 0.0f;
 
     public GameObject[] fullArm;
+    public GameObject[] extensionArm;
+    public GameObject[] welder;
     public GameObject[] rotationBall;
+
+    public float rotationSpeedExtension = 1.0f;
+    public float rotationSpeedMain = 1.0f;
+    public float rotationSpeedWelder = 1.0f;
+
+    public string stringToEdit = "";
+    void OnGUI()
+    {
+        GUI.Label(new Rect(10, 10, 200, 100), stringToEdit);
+    }
+
+    void updateRotationLabel()
+    {
+        stringToEdit = "Lower arm rotation :" + (int)armRotation + @"
+Upper arm rotation :" + (int)extensionRotation + @"
+Welder rotation :" + (int)welderRotation;
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -28,6 +49,7 @@ public class Movement : MonoBehaviour
             startRotation[i] = gameObject.transform.rotation;
             i++;
         }
+        updateRotationLabel();
     }
 
     void Reset()
@@ -43,10 +65,18 @@ public class Movement : MonoBehaviour
 
     void updateRotation()
     {
+        updateRotationLabel();
         GameObject armbase = fullArm[0];
-        GameObject armextension = fullArm[3];
+        //GameObject armextension = fullArm[2];
         Reset();
-        armextension.transform.RotateAround(rotationBall[0].transform.position, directionRIGHT, extensionRotation);
+        foreach (GameObject gameObject in welder)
+        {
+            gameObject.transform.RotateAround(rotationBall[1].transform.position, directionUP, welderRotation);
+        }
+        foreach (GameObject gameObject in extensionArm)
+        {
+            gameObject.transform.RotateAround(rotationBall[0].transform.position, directionRIGHT, extensionRotation);
+        }
         foreach (GameObject gameObject in fullArm)
         {
             gameObject.transform.RotateAround(armbase.transform.position, directionUP, armRotation);
@@ -58,53 +88,38 @@ public class Movement : MonoBehaviour
     {
         bool updRotation = false;
         GameObject armBase = fullArm[0];
-        foreach (GameObject gameObject in fullArm)
-        {
-            if (Input.GetKey(KeyCode.D))
-            {
-                gameObject.transform.position += Vector3.right * speed * Time.deltaTime;
-            }
-            if (Input.GetKey(KeyCode.A))
-            {
-                gameObject.transform.position += Vector3.left * speed * Time.deltaTime;
-            }
-            if (Input.GetKey(KeyCode.W))
-            {
-                gameObject.transform.position += Vector3.forward * speed * Time.deltaTime;
-            }
-            if (Input.GetKey(KeyCode.S))
-            {
-                gameObject.transform.position += Vector3.back * speed * Time.deltaTime;
-            }
-            /*
-            if (Input.GetKey(KeyCode.F))
-            {
-                if (Input.GetKey(KeyCode.LeftControl))
-                    scale += 3.0f * Time.deltaTime;
-                else
-                    scale -= 3.0f * Time.deltaTime;
 
-                gameObject.transform.localScale = new Vector3(scale, scale, scale);
-            }*/
-            if (Input.GetKey(KeyCode.E))
-            {
-                armRotation += 1.0f;
-                updRotation = true;
-            }
-            if (Input.GetKey(KeyCode.Q))
-            {
-                armRotation -= 1.0f;
-                updRotation = true;
-            }
+        if (Input.GetKey(KeyCode.R))
+        {
+            armRotation += rotationSpeedMain;
+            updRotation = true;
         }
+        if (Input.GetKey(KeyCode.Y))
+        {
+            armRotation -= rotationSpeedMain;
+            updRotation = true;
+        }
+
         if (Input.GetKey(KeyCode.T))
         {
-            extensionRotation += 1.0f;
+            extensionRotation -= rotationSpeedExtension;
+            if (extensionRotation < -180) extensionRotation = -180;
             updRotation = true;
         }
         if (Input.GetKey(KeyCode.G))
         {
-            extensionRotation -= 1.0f;
+            extensionRotation += rotationSpeedExtension;
+            if (extensionRotation > 65) extensionRotation = 65;
+            updRotation = true;
+        }
+        if (Input.GetKey(KeyCode.F))
+        {
+            welderRotation += rotationSpeedWelder;
+            updRotation = true;
+        }
+        if (Input.GetKey(KeyCode.H))
+        {
+            welderRotation -= rotationSpeedWelder;
             updRotation = true;
         }
         if (updRotation)
